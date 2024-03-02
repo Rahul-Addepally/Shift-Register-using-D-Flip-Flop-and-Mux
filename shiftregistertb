@@ -1,0 +1,112 @@
+module top;
+
+logic [7:0] Q;      //output
+logic [7:0]Q1;		//temp variable
+logic Clock = 0;		//input
+logic Clear;		//inputs
+logic [7:0] D;		//inputs
+logic [2:0] S;		//inputs
+logic MSBIn;		//inputs	
+logic LSBIn;		//inputs
+
+integer i;        
+logic [7:0] Output_Golden_Dut;  //Variable to check expected output
+logic [11:0] Fail_count = 0 , Pass_Count = 0;
+
+always #5 Clock = ~Clock;
+
+ShiftRegister SRO(Q, Clock, Clear, D, S, MSBIn, LSBIn);
+
+initial 
+	begin
+	Clear = 1'b0;
+	@(negedge Clock);
+	Clear = 1'b1;
+	
+	
+	MSBIn=1'bx;
+	LSBIn=1'bx;
+	
+	for(D=0;D<256;D=D+1)
+		begin
+		for(i=0;i<8;i=i+1)
+			begin
+			S = i;
+			@(negedge Clock);
+			Q1<=Q;
+			if(D == 0 && S == 0)
+				begin
+				Output_Golden_Dut = 8'b00000000;
+				end
+			else if(S == 0)
+				begin
+				Output_Golden_Dut = Q1;
+				end
+			else if(S == 1)
+				begin
+				Output_Golden_Dut = D;
+				end
+			else if(S == 2)
+				begin
+				Output_Golden_Dut = {MSBIn,Q1[7:1]};
+				end
+			else if(S == 3)
+				begin
+				Output_Golden_Dut = {Q1[6:0],LSBIn};
+				end
+			else if(S == 4)
+				begin
+				Output_Golden_Dut = {Q1>>1 | Q1<<7};
+				end
+			else if(S == 5)
+				begin
+				Output_Golden_Dut = {Q1<<1 | Q1>>7};
+				end	
+			else if(S == 6)
+				begin
+				Output_Golden_Dut = {Q1>>1 | Q1&8'b10000000};
+				end
+			else if(S == 7)
+				begin
+				Output_Golden_Dut = Q1 <<< 1;
+				end
+			else 
+				$display("Invalid Input");
+				
+				
+		if(Q !== Output_Golden_Dut)
+			begin
+			Fail_count = Fail_count + 1;
+			$display("Errors are reported");
+			$display("Input:%b S:%b Output:%b Expected_Output:%b",D,S,Q,Output_Golden_Dut);
+			end
+		else
+			begin
+			Pass_Count = Pass_Count + 1;
+			end
+		
+		end
+	
+	if(Pass_Count == 2048)   //comparing with the total number of cases
+		begin
+		$display("All Test cases are passed successfully ");
+		$display("Total no of passed cases are  :  ",Pass_Count);
+		end
+		
+	if(D == 255)
+	break;    //used to break and get out of the loop
+	
+	end
+	
+	
+	if(Fail_count != 0)
+		begin
+		$display("Total no of Failed Cases are:",Fail_count);
+		end
+		
+	$finish;   //used to finish or stop the loop
+	
+	end
+
+endmodule
+
