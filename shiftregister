@@ -1,0 +1,44 @@
+module ShiftRegister(Q, Clock, Clear, D, S, MSBIn, LSBIn); 
+
+output reg [7:0] Q; 
+input Clock; 
+input Clear; 
+input [7:0] D; 
+input [2:0] S; 
+input MSBIn; 
+input LSBIn;
+
+parameter nbits = 8;
+genvar i;
+
+reg [7:0]Y;
+
+generate
+for(i = 0; i < nbits ; i = i + 1)
+begin
+	DFF dff(Q[i],Clock,Clear,Y[i]);
+end
+endgenerate
+
+generate
+for(i = 0 ; i<nbits ; i = i+1)
+	begin
+	if(i == 0)
+		begin
+		Mux8to1 M(Y[i],{1'b0,Q[i+1],Q[i+7],Q[i+1],LSBIn,Q[i+1],D[i],Q[i]},S);
+		end
+	else if(i == 7)
+		begin
+		Mux8to1 M(Y[i],{Q[i-1],Q[i],Q[i-1],Q[i-7],Q[i-1],MSBIn,D[i],Q[i]},S);
+		end
+	else
+		begin
+		Mux8to1 M(Y[i],{Q[i-1],Q[i+1],Q[i-1],Q[i+1],Q[i-1],Q[i+1],D[i],Q[i]},S);
+		end
+	end
+endgenerate
+
+endmodule
+
+
+
