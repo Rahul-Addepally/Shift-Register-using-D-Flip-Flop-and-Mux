@@ -1,0 +1,65 @@
+module top;
+
+wire Y;
+reg [7:0]V;
+reg [2:0]S;
+
+integer i;
+reg YExp_Out;
+reg [11:0]Fail_count = 0;
+reg [11:0]Pass_count = 0;
+
+parameter Time_Delay=5;
+
+Mux8to1 tb(Y,V,S);
+
+always@*
+	   begin
+	   case(S)
+	   3'b000:YExp_Out=V[0];
+	   3'b001:YExp_Out=V[1];
+	   3'b010:YExp_Out=V[2];
+	   3'b011:YExp_Out=V[3];
+	   3'b100:YExp_Out=V[4];
+	   3'b101:YExp_Out=V[5];
+	   3'b110:YExp_Out=V[6];
+	   3'b111:YExp_Out=V[7];
+	   endcase
+	   end
+
+initial
+	begin
+	for(V=0;V<256;V=V+1)
+	begin
+
+		for(i=0;i<8;i=i+1)
+		begin
+		S=i;
+		#Time_Delay;
+		
+		if(YExp_Out !== Y)
+			begin
+			Fail_count=Fail_count+1;
+			$display("Error, Test cases failed");
+			$display("Input:%b S:%0b Output:%b Expected_Output:%0b",V,S,Y,YExp_Out);
+			end
+		else 
+			begin
+			Pass_count=Pass_count+1;
+			end
+		
+		end
+		
+		if(V == 255)
+		break;
+		
+	end
+	
+	if(Pass_count === 2048)
+		$display("All Test cases are passed successfully");
+	else
+		$display("Total no of Failed Cases are:",Fail_count);
+	
+	end
+	
+endmodule
