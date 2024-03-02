@@ -1,0 +1,52 @@
+module top;
+
+wire Q;
+reg Clock=0,Clear=0,D;
+
+DFF tb(Q,Clock,Clear,D);
+
+always #5 Clock=!Clock;
+
+initial
+	begin
+	Clear=0;
+	@(negedge Clock);
+	Clear=1;
+	
+    @(negedge Clock);
+    Clear=1'b0;
+	D=1'b0;
+	@(negedge Clock);
+	$display("Q=%d",Q);
+	Clear=1'b0;
+	D=1'b1;
+	@(negedge Clock);
+	$display("Q=%d",Q);
+	Clear=1'b0;
+	D=1'bx;
+	@(negedge Clock);
+	$display("Q=%d",Q);
+	Clear=1'b0;
+	D=1'bz;
+	@(negedge Clock);
+	$display("Q=%d",Q);
+	Clear=1'b1;
+	D=1'b0;
+	@(negedge Clock);
+	$display("Q=%d",Q);
+    Clear=1'b1;
+    D=1'b1;
+	@(negedge Clock);
+	$display("Q=%d",Q);
+	Clear=1'b1;
+    D=1'bx;
+	@(negedge Clock);   	
+	$display("Q=%d",Q);
+	Clear=1'b1;
+	D=1'bz;
+	@(negedge Clock);
+	$display("Q=%d",Q);
+	$finish;
+	end	
+	
+endmodule
